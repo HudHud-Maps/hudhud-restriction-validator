@@ -42,7 +42,13 @@ export interface RestrictionResponse {
     warnings: number;
     ok: number;
     bbox: [number, number, number, number];
+    osm_timestamp?: string;
   };
+}
+
+export interface SingleRestrictionResponse {
+  restriction: ValidatedRestriction;
+  osm_timestamp?: string;
 }
 
 export interface ApiError {

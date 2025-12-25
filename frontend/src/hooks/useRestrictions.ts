@@ -17,6 +17,7 @@ interface UseRestrictionsResult {
   loading: boolean;
   error: string | null;
   refetch: () => void;
+  clearCacheAndRefetch: () => Promise<void>;
 }
 
 export function useRestrictions(
@@ -66,12 +67,26 @@ export function useRestrictions(
     setFetchTrigger((t) => t + 1);
   }, []);
 
+  const clearCacheAndRefetch = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await ApiService.clearCache();
+      setFetchTrigger((t) => t + 1);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to clear cache';
+      setError(message);
+      setLoading(false);
+    }
+  }, []);
+
   return {
     restrictions,
     meta,
     loading,
     error,
     refetch,
+    clearCacheAndRefetch,
   };
 }
 

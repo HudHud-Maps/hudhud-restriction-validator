@@ -1,7 +1,7 @@
 """Caching service with in-memory LRU + TTL support."""
 
 import hashlib
-from typing import Optional
+from typing import Optional, Union
 
 from cachetools import TTLCache
 
@@ -19,21 +19,25 @@ class CacheService:
             ttl=settings.cache_ttl_seconds,
         )
 
-    def _make_key(self, bbox: tuple[float, float, float, float]) -> str:
-        """Generate cache key from bbox."""
-        # Round to 4 decimal places for cache key stability
-        rounded = tuple(round(v, 4) for v in bbox)
-        key_str = f"restrictions:{rounded}"
+    def _make_key(self, key_input: Union[tuple[float, float, float, float], str]) -> str:
+        """Generate cache key from bbox or string."""
+        if isinstance(key_input, str):
+            # String key - use directly
+            key_str = f"custom:{key_input}"
+        else:
+            # Bbox tuple - round to 4 decimal places for cache key stability
+            rounded = tuple(round(v, 4) for v in key_input)
+            key_str = f"restrictions:{rounded}"
         return hashlib.sha256(key_str.encode()).hexdigest()[:32]
 
-    async def get(self, bbox: tuple[float, float, float, float]) -> Optional[dict]:
-        """Get cached data for bbox."""
-        key = self._make_key(bbox)
+    async def get(self, key_input: Union[tuple[float, float, float, float], str]) -> Optional[dict]:
+        """Get cached data for bbox or string key."""
+        key = self._make_key(key_input)
         return self._cache.get(key)
 
-    async def set(self, bbox: tuple[float, float, float, float], data: dict) -> None:
-        """Cache data for bbox."""
-        key = self._make_key(bbox)
+    async def set(self, key_input: Union[tuple[float, float, float, float], str], data: dict) -> None:
+        """Cache data for bbox or string key."""
+        key = self._make_key(key_input)
         self._cache[key] = data
 
     def clear(self) -> None:

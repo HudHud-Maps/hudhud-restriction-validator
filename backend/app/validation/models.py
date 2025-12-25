@@ -65,6 +65,13 @@ class RestrictionResponse(BaseModel):
     meta: dict[str, Any]
 
 
+class SingleRestrictionResponse(BaseModel):
+    """API response for single restriction endpoint."""
+
+    restriction: ValidatedRestriction
+    osm_timestamp: Optional[str] = None
+
+
 class ErrorResponse(BaseModel):
     """API error response."""
 
