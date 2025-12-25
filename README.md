@@ -58,9 +58,6 @@ sequenceDiagram
 ```bash
 # Get restrictions in bounding box
 curl "http://localhost:8080/api/restrictions?bbox=minLon,minLat,maxLon,maxLat"
-
-# Health check
-curl "http://localhost:8080/api/health"
 ```
 
 ## Environment Variables
