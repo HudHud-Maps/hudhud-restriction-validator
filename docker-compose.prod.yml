@@ -1,0 +1,29 @@
+# Production Docker Compose
+# Run with: docker compose -f docker-compose.prod.yml up -d
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      - DEBUG=false
+      - PORT=8080
+      - OVERPASS_URL=${OVERPASS_URL:-https://overpass-api.hudhud.cloud/api/interpreter}
+      - CACHE_TTL_SECONDS=${CACHE_TTL_SECONDS:-300}
+      - RATE_LIMIT_RPM=${RATE_LIMIT_RPM:-60}
+      # Production: Set your specific allowed origins
+      - CORS_ORIGINS=${CORS_ORIGINS:-["https://osm.hudhud.cloud","https://hudhud.cloud"]}
+      # Security: Maximum request body size (1MB default)
+      - MAX_REQUEST_SIZE=${MAX_REQUEST_SIZE:-1000000}
+      # Security: Bbox area limit (2000 = covers Middle East + surrounding regions)
+      - MAX_BBOX_AREA=${MAX_BBOX_AREA:-2000}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
