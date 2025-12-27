@@ -12,5 +12,5 @@ jobs:
     secrets: inherit
     with:
       NAMESPACE: data
-      DEPLOYMENT_NAME: data/hudhud-restriction-validator
+      DEPLOYMENT_NAME: hudhud-restriction-validator
 
