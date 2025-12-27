@@ -82,4 +82,3 @@ class MissingViaMemberRule(ValidationRule):
                 )
             ]
         return []
-

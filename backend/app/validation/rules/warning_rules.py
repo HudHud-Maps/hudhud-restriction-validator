@@ -27,7 +27,7 @@ class NonExistentMemberRule(ValidationRule):
                 issues.append(
                     Issue(
                         code=self.code,
-                        message=f'member {member.get("role", "unknown")} (id={ref}) not found in data',
+                        message=f"member {member.get('role', 'unknown')} (id={ref}) not found in data",
                         severity=IssueSeverity.WARNING,
                     )
                 )
@@ -83,7 +83,7 @@ class OnewayInconsistencyRule(ValidationRule):
                             issues.append(
                                 Issue(
                                     code=self.code,
-                                    message='restriction on way with oneway=-1 may be redundant',
+                                    message="restriction on way with oneway=-1 may be redundant",
                                     severity=IssueSeverity.WARNING,
                                 )
                             )
@@ -112,4 +112,3 @@ class RedundantRestrictionRule(ValidationRule):
         # In a real implementation, this would analyze road geometry,
         # physical barriers, and other factors
         return []
-

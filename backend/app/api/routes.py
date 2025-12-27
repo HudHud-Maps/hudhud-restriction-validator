@@ -1,6 +1,5 @@
 """API routes for the restriction validator."""
 
-
 from fastapi import APIRouter, HTTPException, Query, Request
 
 from app.api.dependencies import limiter
@@ -70,6 +69,7 @@ async def get_restrictions(
 
         # Security: Validate bbox area is not too large
         from app.config import get_settings
+
         settings = get_settings()
         bbox_area = (max_lon - min_lon) * (max_lat - min_lat)
         if bbox_area > settings.max_bbox_area:
@@ -108,16 +108,16 @@ async def get_restrictions(
         restrictions = [r.model_dump() for r in validated]
 
         # Cache the results (including timestamp)
-        await cache_service.set(bbox_tuple, {"restrictions": restrictions, "osm_timestamp": osm_timestamp})
+        await cache_service.set(
+            bbox_tuple, {"restrictions": restrictions, "osm_timestamp": osm_timestamp}
+        )
 
     # Apply filters
     if status_filter:
         restrictions = [r for r in restrictions if r["status"] == status_filter]
 
     if type_filter:
-        restrictions = [
-            r for r in restrictions if r.get("restriction_type") == type_filter
-        ]
+        restrictions = [r for r in restrictions if r.get("restriction_type") == type_filter]
 
     # Compute meta
     total = len(restrictions)
@@ -202,9 +202,7 @@ out skel qt;
     validated = engine.validate(overpass_data)
 
     if not validated:
-        raise HTTPException(
-            status_code=404, detail=f"Restriction {relation_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Restriction {relation_id} not found")
 
     return SingleRestrictionResponse(
         restriction=validated[0],
@@ -262,7 +260,9 @@ async def get_sa_issues(
 
     # Build bbox for Saudi Arabia
     bbox_tuple = (SA_BOUNDS["west"], SA_BOUNDS["south"], SA_BOUNDS["east"], SA_BOUNDS["north"])
-    overpass_bbox = f"{SA_BOUNDS['south']},{SA_BOUNDS['west']},{SA_BOUNDS['north']},{SA_BOUNDS['east']}"
+    overpass_bbox = (
+        f"{SA_BOUNDS['south']},{SA_BOUNDS['west']},{SA_BOUNDS['north']},{SA_BOUNDS['east']}"
+    )
 
     # Check cache first (use special string key for SA-wide query)
     cache_key = f"sa_issues_{status}"
@@ -352,4 +352,3 @@ out body qt;
         restrictions=restrictions,
         meta=meta,
     )
-

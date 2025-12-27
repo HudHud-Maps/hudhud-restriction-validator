@@ -40,4 +40,3 @@ class ValidationRule(ABC):
             List of Issue objects found (empty if rule passes)
         """
         pass
-

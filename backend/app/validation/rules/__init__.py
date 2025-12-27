@@ -33,4 +33,3 @@ ALL_RULES: list[type[ValidationRule]] = [
 ]
 
 __all__ = ["ValidationRule", "ALL_RULES"]
-

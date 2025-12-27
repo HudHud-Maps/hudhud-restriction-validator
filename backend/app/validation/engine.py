@@ -74,9 +74,7 @@ class ValidationEngine:
             if restriction_type and restriction_type not in VALID_TURN_RESTRICTION_TYPES:
                 continue
 
-            validated_restriction = self._validate_relation(
-                relation, elements_by_id, nodes_by_id
-            )
+            validated_restriction = self._validate_relation(relation, elements_by_id, nodes_by_id)
             validated.append(validated_restriction)
 
         return validated
@@ -176,4 +174,3 @@ class ValidationEngine:
                             return Coordinates(lat=node["lat"], lon=node["lon"])
 
         return None
-

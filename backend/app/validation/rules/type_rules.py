@@ -152,4 +152,3 @@ class MissingRestrictionTagRule(ValidationRule):
             ]
 
         return []
-

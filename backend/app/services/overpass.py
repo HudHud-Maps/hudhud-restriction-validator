@@ -51,9 +51,7 @@ out body qt;
 """
         return query.strip()
 
-    async def fetch_restrictions(
-        self, bbox: tuple[float, float, float, float]
-    ) -> dict[str, Any]:
+    async def fetch_restrictions(self, bbox: tuple[float, float, float, float]) -> dict[str, Any]:
         """
         Fetch turn restrictions from Overpass API.
 
@@ -120,4 +118,3 @@ out body qt;
 
 # Singleton client instance
 overpass_client = OverpassClient()
-
