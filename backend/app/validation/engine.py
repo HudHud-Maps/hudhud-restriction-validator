@@ -69,11 +69,11 @@ class ValidationEngine:
                 if key == "restriction" or key.startswith("restriction:"):
                     restriction_type = value
                     break
-            
+
             # Skip non-turn restrictions (no_entry, no_exit, etc.)
             if restriction_type and restriction_type not in VALID_TURN_RESTRICTION_TYPES:
                 continue
-            
+
             validated_restriction = self._validate_relation(
                 relation, elements_by_id, nodes_by_id
             )

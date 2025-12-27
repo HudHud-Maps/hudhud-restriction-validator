@@ -1,6 +1,5 @@
 """API routes for the restriction validator."""
 
-from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query, Request
 
@@ -36,12 +35,12 @@ async def get_restrictions(
         description="Bounding box as minLon,minLat,maxLon,maxLat",
         examples=["13.3,52.5,13.4,52.52"],
     ),
-    status_filter: Optional[str] = Query(
+    status_filter: str | None = Query(
         None,
         description="Filter by status: ok, warning, error",
         alias="status",
     ),
-    type_filter: Optional[str] = Query(
+    type_filter: str | None = Query(
         None,
         description="Filter by restriction type (e.g., no_left_turn)",
         alias="type",
@@ -84,7 +83,7 @@ async def get_restrictions(
         raise HTTPException(
             status_code=400,
             detail=f"Invalid bbox format: {str(e)}. Expected: minLon,minLat,maxLon,maxLat",
-        )
+        ) from None
 
     # Check cache first
     cached = await cache_service.get(bbox_tuple)
@@ -96,7 +95,7 @@ async def get_restrictions(
         try:
             overpass_data = await overpass_client.fetch_restrictions(bbox_tuple)
         except OverpassError as e:
-            raise HTTPException(status_code=e.status_code, detail=e.message)
+            raise HTTPException(status_code=e.status_code, detail=e.message) from None
 
         # Extract Overpass timestamp (osm3s metadata)
         osm_timestamp = overpass_data.get("osm3s", {}).get("timestamp_osm_base")
@@ -191,9 +190,9 @@ out skel qt;
             overpass_data = response.json()
 
     except httpx.TimeoutException:
-        raise HTTPException(status_code=504, detail="Request timed out")
+        raise HTTPException(status_code=504, detail="Request timed out") from None
     except httpx.RequestError as e:
-        raise HTTPException(status_code=503, detail=f"Network error: {str(e)}")
+        raise HTTPException(status_code=503, detail=f"Network error: {str(e)}") from None
 
     # Extract Overpass timestamp
     osm_timestamp = overpass_data.get("osm3s", {}).get("timestamp_osm_base")
@@ -218,7 +217,7 @@ out skel qt;
 async def clear_cache(request: Request):
     """
     Clear the server-side cache.
-    
+
     This forces fresh data to be fetched from Overpass on the next request.
     """
     cache_service.clear()
@@ -252,18 +251,19 @@ async def get_sa_issues(
 ):
     """
     Get all restrictions with issues (errors/warnings) across Saudi Arabia.
-    
+
     This queries the entire SA region and returns only restrictions with problems.
     """
     import httpx
+
     from app.config import get_settings
-    
+
     settings = get_settings()
-    
+
     # Build bbox for Saudi Arabia
     bbox_tuple = (SA_BOUNDS["west"], SA_BOUNDS["south"], SA_BOUNDS["east"], SA_BOUNDS["north"])
     overpass_bbox = f"{SA_BOUNDS['south']},{SA_BOUNDS['west']},{SA_BOUNDS['north']},{SA_BOUNDS['east']}"
-    
+
     # Check cache first (use special string key for SA-wide query)
     cache_key = f"sa_issues_{status}"
     cached = await cache_service.get(cache_key)
@@ -272,7 +272,7 @@ async def get_sa_issues(
             restrictions=cached["restrictions"],
             meta=cached["meta"],
         )
-    
+
     # Query all restrictions in Saudi Arabia
     query = f"""
 [out:json][timeout:180];
@@ -283,7 +283,7 @@ out body;
 >;
 out body qt;
 """
-    
+
     try:
         async with httpx.AsyncClient(timeout=200) as client:
             response = await client.post(
@@ -291,7 +291,7 @@ out body qt;
                 data={"data": query},
                 headers={"Content-Type": "application/x-www-form-urlencoded"},
             )
-            
+
             if response.status_code == 429:
                 raise HTTPException(
                     status_code=429,
@@ -302,24 +302,24 @@ out body qt;
                     status_code=response.status_code,
                     detail="Failed to fetch restrictions from Overpass",
                 )
-            
+
             overpass_data = response.json()
-    
+
     except httpx.TimeoutException:
         raise HTTPException(
             status_code=504,
             detail="Request timed out. Saudi Arabia query takes time, please try again.",
-        )
+        ) from None
     except httpx.RequestError as e:
-        raise HTTPException(status_code=503, detail=f"Network error: {str(e)}")
-    
+        raise HTTPException(status_code=503, detail=f"Network error: {str(e)}") from None
+
     # Extract timestamp
     osm_timestamp = overpass_data.get("osm3s", {}).get("timestamp_osm_base")
-    
+
     # Validate all restrictions
     engine = ValidationEngine()
     validated = engine.validate(overpass_data)
-    
+
     # Filter to only issues based on status parameter
     if status == "error":
         issues = [r for r in validated if r.status == "error"]
@@ -327,15 +327,15 @@ out body qt;
         issues = [r for r in validated if r.status == "warning"]
     else:  # "all" - both errors and warnings
         issues = [r for r in validated if r.status in ("error", "warning")]
-    
+
     # Convert to dict
     restrictions = [r.model_dump() for r in issues]
-    
+
     # Compute meta
     total = len(restrictions)
     errors = sum(1 for r in restrictions if r["status"] == "error")
     warnings = sum(1 for r in restrictions if r["status"] == "warning")
-    
+
     meta = {
         "total": total,
         "errors": errors,
@@ -344,10 +344,10 @@ out body qt;
         "bbox": list(bbox_tuple),
         "osm_timestamp": osm_timestamp,
     }
-    
+
     # Cache the results
     await cache_service.set(cache_key, {"restrictions": restrictions, "meta": meta})
-    
+
     return RestrictionResponse(
         restrictions=restrictions,
         meta=meta,

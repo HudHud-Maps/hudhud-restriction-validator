@@ -151,12 +151,14 @@ export function MarkerCluster({ restrictions, highlightedId }: MarkerClusterProp
 
   // Cleanup on component unmount
   useEffect(() => {
+    const clusterGroup = clusterGroupRef.current;
+    const markers = markersRef.current;
     return () => {
-      if (clusterGroupRef.current) {
-        map.removeLayer(clusterGroupRef.current);
+      if (clusterGroup) {
+        map.removeLayer(clusterGroup);
         clusterGroupRef.current = null;
       }
-      markersRef.current.clear();
+      markers.clear();
     };
   }, [map]);
 

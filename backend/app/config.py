@@ -1,7 +1,6 @@
 """Application configuration via environment variables."""
 
 from functools import lru_cache
-from typing import Optional
 
 from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
@@ -35,10 +34,10 @@ class Settings(BaseSettings):
     # CORS - Set specific origins in production
     # Use comma-separated list in env: CORS_ORIGINS=https://app.hudhud.cloud,https://admin.hudhud.cloud
     cors_origins: list[str] = ["https://osm.hudhud.cloud", "https://hudhud.cloud"]
-    
+
     # Security: Request size limit (bytes) - default 1MB
     max_request_size: int = 1_000_000
-    
+
     # Security: Maximum bbox area (in square degrees)
     # Large area to cover Middle East + surrounding regions
     # Set to 2000 to allow full regional views

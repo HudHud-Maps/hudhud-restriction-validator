@@ -83,7 +83,7 @@ class OnewayInconsistencyRule(ValidationRule):
                             issues.append(
                                 Issue(
                                     code=self.code,
-                                    message=f'restriction on way with oneway=-1 may be redundant',
+                                    message='restriction on way with oneway=-1 may be redundant',
                                     severity=IssueSeverity.WARNING,
                                 )
                             )

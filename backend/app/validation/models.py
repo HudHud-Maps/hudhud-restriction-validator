@@ -1,7 +1,7 @@
 """Pydantic models for validation results."""
 
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -27,7 +27,7 @@ class RestrictionMember(BaseModel):
     id: int
     type: str  # "node", "way", or "relation"
     role: str  # "from", "to", "via", or other
-    ref: Optional[int] = None
+    ref: int | None = None
 
 
 class Coordinates(BaseModel):
@@ -41,12 +41,12 @@ class ValidatedRestriction(BaseModel):
     """A turn restriction with validation results."""
 
     id: int
-    restriction_type: Optional[str] = None
+    restriction_type: str | None = None
     members: list[RestrictionMember] = []
     tags: dict[str, str] = {}
     issues: list[Issue] = []
     status: str = "ok"  # "ok", "warning", "error"
-    location: Optional[Coordinates] = None
+    location: Coordinates | None = None
 
     def compute_status(self) -> None:
         """Compute status based on issues."""
@@ -69,12 +69,12 @@ class SingleRestrictionResponse(BaseModel):
     """API response for single restriction endpoint."""
 
     restriction: ValidatedRestriction
-    osm_timestamp: Optional[str] = None
+    osm_timestamp: str | None = None
 
 
 class ErrorResponse(BaseModel):
     """API error response."""
 
     error: str
-    detail: Optional[str] = None
+    detail: str | None = None
 
